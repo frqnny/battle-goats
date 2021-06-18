@@ -3,8 +3,6 @@ package io.github.frqnny.battlegoats.entity.ai;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
-import java.util.List;
-
 import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.TargetPredicate;
@@ -12,32 +10,22 @@ import net.minecraft.entity.ai.brain.Activity;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleState;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.ai.brain.task.BreedTask;
-import net.minecraft.entity.ai.brain.task.FollowMobTask;
-import net.minecraft.entity.ai.brain.task.GoTowardsLookTarget;
-import net.minecraft.entity.ai.brain.task.LeapingChargeTask;
-import net.minecraft.entity.ai.brain.task.LongJumpTask;
-import net.minecraft.entity.ai.brain.task.LookAroundTask;
-import net.minecraft.entity.ai.brain.task.PrepareRamTask;
-import net.minecraft.entity.ai.brain.task.RamImpactTask;
-import net.minecraft.entity.ai.brain.task.RandomTask;
-import net.minecraft.entity.ai.brain.task.StayAboveWaterTask;
-import net.minecraft.entity.ai.brain.task.StrollTask;
-import net.minecraft.entity.ai.brain.task.TemptTask;
-import net.minecraft.entity.ai.brain.task.TemptationCooldownTask;
-import net.minecraft.entity.ai.brain.task.TimeLimitedTask;
-import net.minecraft.entity.ai.brain.task.WaitTask;
-import net.minecraft.entity.ai.brain.task.WalkTask;
-import net.minecraft.entity.ai.brain.task.WalkTowardClosestAdultTask;
-import net.minecraft.entity.ai.brain.task.WanderAroundTask;
+import net.minecraft.entity.ai.brain.task.*;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 
 public class BattleGoatBrain {
+    //There's a bunch of fields here that I don't want to delete tbh
     public static final int field_33490 = 20;
     public static final int field_33491 = 7;
+    public static final int field_33492 = 5;
+    public static final int field_33493 = 5;
+    public static final float field_33494 = 1.5F;
+    public static final int field_33495 = 4;
+    public static final float field_33496 = 2.5F;
+    public static final float field_33497 = 1.0F;
     private static final UniformIntProvider WALKING_SPEED = UniformIntProvider.create(5, 16);
     private static final float BREEDING_WALK_SPEED = 1.0F;
     private static final float FOLLOWING_TARGET_WALK_SPEED = 1.0F;
@@ -46,16 +34,10 @@ public class BattleGoatBrain {
     private static final float NORMAL_WALK_SPEED = 2.0F;
     private static final float field_33498 = 1.25F;
     private static final UniformIntProvider LONG_JUMP_COOLDOWN_RANGE = UniformIntProvider.create(600, 1200);
-    public static final int field_33492 = 5;
-    public static final int field_33493 = 5;
-    public static final float field_33494 = 1.5F;
     private static final UniformIntProvider RAM_COOLDOWN_RANGE = UniformIntProvider.create(600, 6000);
     private static final UniformIntProvider SCREAMING_RAM_COOLDOWN_RANGE = UniformIntProvider.create(100, 300);
     private static final TargetPredicate RAM_TARGET_PREDICATE = TargetPredicate.createAttackable().setPredicate((livingEntity) -> !livingEntity.getType().equals(EntityType.GOAT) && livingEntity.world.getWorldBorder().contains(livingEntity.getBoundingBox()));
     private static final float field_33501 = 3.0F;
-    public static final int field_33495 = 4;
-    public static final float field_33496 = 2.5F;
-    public static final float field_33497 = 1.0F;
 
     public static void resetLongJumpCooldown(BattleGoatEntity goat) {
         goat.getBrain().remember(MemoryModuleType.LONG_JUMP_COOLING_DOWN, LONG_JUMP_COOLDOWN_RANGE.get(goat.world.random));
