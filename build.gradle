@@ -19,6 +19,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	//Dependencies
+	modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
 	modImplementation include("com.github.Draylar.omega-config:omega-config-base:${project.config_version}")
 }
 
@@ -57,5 +58,12 @@ jar {
 	from "LICENSE"
 }
 repositories {
+	maven {
+		name = "CottonMC"
+		url = "https://server.bbkr.space/artifactory/libs-release"
+	}
 	maven { url 'https://jitpack.io' }
+}
+minecraft {
+	accessWidener "src/main/resources/battlegoats.accesswidener"
 }

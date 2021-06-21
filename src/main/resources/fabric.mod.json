@@ -12,13 +12,20 @@
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
   "license": "LGPL 3.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/battle-goats/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "io.github.frqnny.battlegoats.BattleGoats"
+    ],
+    "client": [
+      "io.github.frqnny.battlegoats.BattleGoatsClient"
     ]
   },
+  "accessWidener": "battlegoats.accesswidener",
+  "mixins": [
+    "battlegoats.mixins.json"
+  ],
   "depends": {
     "minecraft": "1.17.x"
   }

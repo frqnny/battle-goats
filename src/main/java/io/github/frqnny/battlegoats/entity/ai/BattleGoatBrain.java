@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
+import io.github.frqnny.battlegoats.entity.ai.task.SitTask;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.brain.Activity;
@@ -11,33 +12,20 @@ import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleState;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.brain.task.*;
+import net.minecraft.entity.passive.GoatBrain;
+import net.minecraft.entity.passive.GoatEntity;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 
 public class BattleGoatBrain {
-    //There's a bunch of fields here that I don't want to delete tbh
-    public static final int field_33490 = 20;
-    public static final int field_33491 = 7;
-    public static final int field_33492 = 5;
-    public static final int field_33493 = 5;
-    public static final float field_33494 = 1.5F;
-    public static final int field_33495 = 4;
-    public static final float field_33496 = 2.5F;
-    public static final float field_33497 = 1.0F;
+    //There's a bunch of fields here that I don't want to delete tbh, but I did so go check BattleGoatBrain
     private static final UniformIntProvider WALKING_SPEED = UniformIntProvider.create(5, 16);
-    private static final float BREEDING_WALK_SPEED = 1.0F;
-    private static final float FOLLOWING_TARGET_WALK_SPEED = 1.0F;
-    private static final float TEMPTED_WALK_SPEED = 1.25F;
-    private static final float FOLLOW_ADULT_WALK_SPEED = 1.25F;
-    private static final float NORMAL_WALK_SPEED = 2.0F;
-    private static final float field_33498 = 1.25F;
     private static final UniformIntProvider LONG_JUMP_COOLDOWN_RANGE = UniformIntProvider.create(600, 1200);
     private static final UniformIntProvider RAM_COOLDOWN_RANGE = UniformIntProvider.create(600, 6000);
     private static final UniformIntProvider SCREAMING_RAM_COOLDOWN_RANGE = UniformIntProvider.create(100, 300);
     private static final TargetPredicate RAM_TARGET_PREDICATE = TargetPredicate.createAttackable().setPredicate((livingEntity) -> !livingEntity.getType().equals(EntityType.GOAT) && livingEntity.world.getWorldBorder().contains(livingEntity.getBoundingBox()));
-    private static final float field_33501 = 3.0F;
 
     public static void resetLongJumpCooldown(BattleGoatEntity goat) {
         goat.getBrain().remember(MemoryModuleType.LONG_JUMP_COOLING_DOWN, LONG_JUMP_COOLDOWN_RANGE.get(goat.world.random));
@@ -59,6 +47,7 @@ public class BattleGoatBrain {
         brain.setTaskList(Activity.CORE, 0,
                 ImmutableList.of(
                         new StayAboveWaterTask(0.8F),
+                        //new SitTask(),
                         new WalkTask(2.0F),
                         new LookAroundTask(45, 90),
                         new WanderAroundTask(),
@@ -107,8 +96,9 @@ public class BattleGoatBrain {
     private static void addRamActivities(Brain<BattleGoatEntity> brain) {
         brain.setTaskList(Activity.RAM,
                 ImmutableList.of(
-                        Pair.of(0, new RamImpactTask<>((goat) -> goat.isScreaming() ? SCREAMING_RAM_COOLDOWN_RANGE : RAM_COOLDOWN_RANGE, RAM_TARGET_PREDICATE, 3.0F, (goat) -> goat.isBaby() ? 1.0D : 2.5D, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_RAM_IMPACT : SoundEvents.ENTITY_GOAT_RAM_IMPACT)),
-                        Pair.of(1, new PrepareRamTask<>((goatEntity) -> goatEntity.isScreaming() ? SCREAMING_RAM_COOLDOWN_RANGE.getMin() : RAM_COOLDOWN_RANGE.getMin(), 4, 7, 1.25F, RAM_TARGET_PREDICATE, 20, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_PREPARE_RAM : SoundEvents.ENTITY_GOAT_PREPARE_RAM))),
+                        Pair.of(0, new RamImpactTask<>((goat) -> goat.isScreaming() ? SCREAMING_RAM_COOLDOWN_RANGE : RAM_COOLDOWN_RANGE, RAM_TARGET_PREDICATE, (goat) -> goat.isBaby() ? 1 : 2, 3.0F, (goatEntity) -> goatEntity.isBaby() ? 1.0D : 2.5D, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_RAM_IMPACT : SoundEvents.ENTITY_GOAT_RAM_IMPACT)),
+                        Pair.of(1, new PrepareRamTask<>((goatEntity) -> goatEntity.isScreaming() ? SCREAMING_RAM_COOLDOWN_RANGE.getMin() : RAM_COOLDOWN_RANGE.getMin(), 4, 7, 1.25F, RAM_TARGET_PREDICATE, 20, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_PREPARE_RAM : SoundEvents.ENTITY_GOAT_PREPARE_RAM))
+                ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryModuleState.VALUE_ABSENT),
                         Pair.of(MemoryModuleType.BREED_TARGET, MemoryModuleState.VALUE_ABSENT),
