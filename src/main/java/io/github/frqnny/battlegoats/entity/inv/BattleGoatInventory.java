@@ -21,6 +21,7 @@ public class BattleGoatInventory implements Inventory {
         this.size = battleGoat.getInvSize();
         this.stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
     }
+
     @Override
     public int size() {
         return size;

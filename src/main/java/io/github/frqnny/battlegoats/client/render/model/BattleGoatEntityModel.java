@@ -4,7 +4,6 @@ import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.client.render.entity.model.QuadrupedEntityModel;
-import net.minecraft.entity.data.DataTracker;
 
 public class BattleGoatEntityModel<T extends BattleGoatEntity> extends QuadrupedEntityModel<T> {
     public BattleGoatEntityModel(ModelPart root) {

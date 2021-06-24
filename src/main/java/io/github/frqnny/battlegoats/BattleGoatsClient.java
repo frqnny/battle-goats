@@ -9,5 +9,6 @@ public class BattleGoatsClient implements ClientModInitializer {
     public void onInitializeClient() {
         EntitiesBG.clientInit();
         ScreensBG.clientInit();
+
     }
 }

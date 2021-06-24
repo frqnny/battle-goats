@@ -1,11 +1,8 @@
 package io.github.frqnny.battlegoats.mixin;
 
-import io.github.frqnny.battlegoats.client.gui.BattleGoatGUI;
 import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
 import io.github.frqnny.battlegoats.init.EntitiesBG;
 import io.github.frqnny.battlegoats.init.ItemsBG;
-import io.github.frqnny.battlegoats.init.MemoryModulesBG;
-import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -14,7 +11,6 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
@@ -52,7 +48,7 @@ public abstract class MixinGoatEntity extends AnimalEntity {
             isConverting = true;
             converter = player.getUuid();
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 200, Math.min(this.world.getDifficulty().getId() - 1, 0)));
-            this.world.sendEntityStatus(this, (byte)25);
+            this.world.sendEntityStatus(this, (byte) 25);
         }
     }
 
@@ -70,7 +66,7 @@ public abstract class MixinGoatEntity extends AnimalEntity {
                 this.remove(RemovalReason.DISCARDED);
                 BattleGoatEntity goatEntity = EntitiesBG.BATTLE_GOAT.create(this.world);
                 goatEntity.copyPositionAndRotation(this);
-                goatEntity.getModBrain().remember(MemoryModulesBG.OWNER, uuid);
+                goatEntity.setOwnerUuid(converter);
                 goatEntity.initialize((ServerWorld) this.world, world.getLocalDifficulty(goatEntity.getBlockPos()), SpawnReason.CONVERSION, null, null);
                 this.world.spawnEntity(goatEntity);
             }
