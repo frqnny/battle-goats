@@ -98,7 +98,7 @@ public class BattleGoatBrain {
     private static void addRamActivities(Brain<BattleGoatEntity> brain) {
         brain.setTaskList(Activity.RAM,
                 ImmutableList.of(
-                        Pair.of(0, new ExtendedRamImpactTask(RAM_TARGET_PREDICATE, (goat) -> goat.isBaby() ? 1 : 2, 3.0F, (goatEntity) -> goatEntity.isBaby() ? 1.0D : 2.5D, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_RAM_IMPACT : SoundEvents.ENTITY_GOAT_RAM_IMPACT))
+                        Pair.of(0, new ExtendedRamImpactTask(RAM_TARGET_PREDICATE, 3.0F, (goatEntity) -> goatEntity.isBaby() ? 1.0D : 2.5D, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_RAM_IMPACT : SoundEvents.ENTITY_GOAT_RAM_IMPACT))
                 ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.RAM_TARGET, MemoryModuleState.VALUE_PRESENT)

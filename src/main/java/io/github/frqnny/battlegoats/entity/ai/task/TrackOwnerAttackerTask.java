@@ -29,7 +29,7 @@ public class TrackOwnerAttackerTask extends Task<BattleGoatEntity> {
 
                 int i = livingEntity.getLastAttackedTime();
 
-                return attacker != null && goat.canAttackWithOwner(attacker, livingEntity) && i != this.lastAttackedTime;
+                return attacker != null && goat.canAttackWithOwner(attacker, livingEntity) && i != this.lastAttackedTime && !goat.hasPassengers();
             }
         }
 

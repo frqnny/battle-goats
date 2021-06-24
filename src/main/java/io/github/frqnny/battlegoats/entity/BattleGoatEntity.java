@@ -8,7 +8,6 @@ import io.github.frqnny.battlegoats.client.gui.BattleGoatGUI;
 import io.github.frqnny.battlegoats.entity.ai.BattleGoatBrain;
 import io.github.frqnny.battlegoats.entity.inv.BattleGoatInventory;
 import io.github.frqnny.battlegoats.init.EntitiesBG;
-import io.github.frqnny.battlegoats.init.MemoryModulesBG;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
@@ -55,30 +54,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandlerFactory, Tameable, Saddleable, ItemSteerable, JumpingMount {
+public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandlerFactory, Tameable, Saddleable, JumpingMount {
     public static final Identifier ID = BattleGoats.id("battle_goat");
     public static final TrackedData<Boolean> SITTING = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     protected static final ImmutableList<SensorType<? extends Sensor<? super GoatEntity>>> SENSORS = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.GOAT_TEMPTATIONS);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_MODULES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.VISIBLE_MOBS, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLING_DOWN, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, MemoryModuleType.IS_TEMPTED, MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryModuleType.RAM_TARGET, MemoryModulesBG.OWNER);
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_MODULES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.VISIBLE_MOBS, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLING_DOWN, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, MemoryModuleType.IS_TEMPTED, MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryModuleType.RAM_TARGET);
     protected static final TrackedData<Optional<UUID>> OWNER_UUID = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
-    protected static final TrackedData<Boolean> ANGRY = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    protected static final TrackedData<Boolean> JUMPING = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> SADDLED = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Integer> BOOST_TIME = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Integer> GOAT_LEVEL = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.INTEGER);
+
+
     public final HealthSkillLevel healthSkillLevel = new HealthSkillLevel(this);
     public final SpeedSkillLevel speedSkillLevel = new SpeedSkillLevel(this);
     public final JumpSkillLevel jumpSkillLevel = new JumpSkillLevel();
     public final AttackDamageSkillLevel attackDamageSkillLevel = new AttackDamageSkillLevel(this);
     private final BattleGoatInventory inv;
     private final SaddledComponent saddledComponent;
-    //TODO consider splitting up into Battle Level, Speed Level, Health?
     public PropertyDelegate delegate;
     public boolean sitting = false;
     public boolean alreadyInteracted = false;
     protected float jumpStrength;
     protected boolean inAir;
     private boolean jumping;
-    private int angryTicks;
+    private int jumpingTicks;
     private int speedTicks = -1;
 
     public BattleGoatEntity(EntityType<? extends GoatEntity> entityType, World world) {
@@ -176,8 +175,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         BattleGoatBrain.resetLongJumpCooldown(this);
         if (spawnReason != SpawnReason.CONVERSION) {
             this.setScreaming(world.getRandom().nextDouble() < 0.02D);
-        } else {
-
         }
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     }
@@ -382,28 +379,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         return 10;
     }
 
-    @Override
-    public boolean consumeOnAStickItem() {
-        return this.saddledComponent.boost(this.getRandom());
-
-    }
-
-    @Override
-    public void setMovementInput(Vec3d movementInput) {
-        super.travel(movementInput);
-
-    }
-
-    @Override
-    public float getSaddledSpeed() {
-        //TODO implement speed level
-        if (this.getPrimaryPassenger() instanceof LivingEntity entity) {
-            return entity.forwardSpeed * 0.225F;
-        }
-        return 0;
-
-    }
-
     public void onInvChange() {
         //TODO implement gadget update
 
@@ -415,10 +390,9 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         super.initDataTracker();
         this.dataTracker.startTracking(SADDLED, false);
         this.dataTracker.startTracking(BOOST_TIME, 0);
-        this.dataTracker.startTracking(GOAT_LEVEL, 0);
         this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(OWNER_UUID, Optional.empty());
-        this.dataTracker.startTracking(ANGRY, false);
+        this.dataTracker.startTracking(JUMPING, false);
     }
 
     @Override
@@ -540,8 +514,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         if (height > 40) {
             this.playSound(SoundEvents.ENTITY_GOAT_LONG_JUMP, 0.4F, 1.0F);
         }
-
-        //this.brain.doExclusively(Activity.LONG_JUMP);
     }
 
     public void stopJumping() {
@@ -555,34 +527,24 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         this.inAir = inAir;
     }
 
-    private void updateAnger() {
-        if (this.isLogicalSideForUpdatingMovement() || this.canMoveVoluntarily()) {
-            this.angryTicks = 1;
-            this.setAngry(true);
-        }
-    }
 
     public boolean isAngry() {
-        return this.dataTracker.get(ANGRY);
+        return this.dataTracker.get(JUMPING);
     }
 
     public void setAngry(boolean angry) {
-        this.dataTracker.set(ANGRY, angry);
+        this.dataTracker.set(JUMPING, angry);
     }
 
     public void tick() {
         super.tick();
-        if ((this.isLogicalSideForUpdatingMovement() || this.canMoveVoluntarily()) && this.angryTicks > 0 && ++this.angryTicks > 20) {
-            this.angryTicks = 0;
+        if ((this.isLogicalSideForUpdatingMovement() || this.canMoveVoluntarily()) && this.jumpingTicks > 0 && ++this.jumpingTicks > 20) {
+            this.jumpingTicks = 0;
             this.setAngry(false);
         }
         if (!this.isAngry()) {
             this.jumping = false;
         }
-
-        if (!world.isClient()) {
-        }
-
     }
 
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
@@ -621,5 +583,9 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         } else {
             return false;
         }
+    }
+
+    public float getAttackDamage() {
+        return (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
     }
 }

@@ -24,7 +24,7 @@ public class AttackWithOwnerTask extends Task<BattleGoatEntity> {
         if (!goat.isSitting()) {
             if (goat.getOwner() instanceof LivingEntity owner) {
                 int i = owner.getLastAttackTime();
-                return i != this.lastAttackTime && goat.canAttackWithOwner(owner.getAttacking(), owner);
+                return i != this.lastAttackTime && goat.canAttackWithOwner(owner.getAttacking(), owner) && !goat.hasPassengers();
             }
         }
 

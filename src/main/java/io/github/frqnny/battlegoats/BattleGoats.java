@@ -10,6 +10,8 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
+import java.util.Map;
+
 public class BattleGoats implements ModInitializer {
     public static final String MODID = "battle-goats";
     public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(
@@ -27,5 +29,7 @@ public class BattleGoats implements ModInitializer {
         MemoryModulesBG.init();
         EntitiesBG.init();
         ScreensBG.init();
+
+
     }
 }
