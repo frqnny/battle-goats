@@ -26,7 +26,7 @@ public class EntitiesBG {
 
     public static void init() {
         Registry.register(Registry.ENTITY_TYPE, BattleGoatEntity.ID, BATTLE_GOAT);
-        FabricDefaultAttributeRegistry.register(BATTLE_GOAT, BattleGoatEntity.createGoatAttributes());
+        FabricDefaultAttributeRegistry.register(BATTLE_GOAT, BattleGoatEntity.createBattleGoatAttributes());
     }
 
 

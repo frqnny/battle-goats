@@ -66,5 +66,14 @@ public class BattleGoatEntityModel<T extends BattleGoatEntity> extends Quadruped
 
         }
     }
+
+
+    public ModelPart getHead() {
+        return this.head;
+    }
+
+    public ModelPart getBody() {
+        return this.body;
+    }
 }
 

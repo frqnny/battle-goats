@@ -78,7 +78,7 @@ public class ExtendedRamImpactTask extends Task<BattleGoatEntity> {
             serverWorld.sendEntityStatus(goat, (byte) 59);
             if (target.isDead()) {
                 goat.getBrain().forget(MemoryModuleType.RAM_TARGET);
-                this.moveTo(goat, goat.getOwner());
+                this.moveToPlayer(goat, goat.getOwner());
                 goat.attackDamageSkillLevel.addXp(8);
             }
             goat.healthSkillLevel.addXp(2);
@@ -102,6 +102,11 @@ public class ExtendedRamImpactTask extends Task<BattleGoatEntity> {
     public void moveTo(BattleGoatEntity goat, Entity entity) {
         goat.getModBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(entity, 2.5F, 0));
         goat.getModBrain().remember(MemoryModuleType.LOOK_TARGET, new EntityLookTarget(entity, false));
+    }
+
+    public void moveToPlayer(BattleGoatEntity goat, Entity entity) {
+        goat.getModBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(entity, 2.5F, 0));
+        goat.getModBrain().remember(MemoryModuleType.LOOK_TARGET, new EntityLookTarget(entity, true));
     }
 
 }

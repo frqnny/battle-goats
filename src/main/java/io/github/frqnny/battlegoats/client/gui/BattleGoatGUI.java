@@ -42,18 +42,21 @@ public class BattleGoatGUI extends SyncedGuiDescription {
         jumpBar.setProperties(battleGoat.delegate);
         root.add(jumpBar, 15, 45, 150, 10);
 
-        WLabel attackDamageLevel = new WLabel(String.valueOf(battleGoat.jumpSkillLevel.level));
+        WLabel attackDamageLevel = new WLabel(String.valueOf(battleGoat.attackDamageSkillLevel.level));
         root.add(attackDamageLevel, 5, 60);
         WBar attackDamageBar = new WBar(BattleGoats.id("textures/gui/xp_0.png"), BattleGoats.id("textures/gui/attack_damage_bar.png"), 3, 7, WBar.Direction.RIGHT);
         attackDamageBar.setProperties(battleGoat.delegate);
         root.add(attackDamageBar, 15, 60, 150, 10);
 
 
-        WItemSlot slots = WItemSlot.outputOf(battleGoat.getInventory(), 0);
+        WItemSlot saddle = WItemSlot.of(battleGoat.getInventory(), 0);
         WSprite saddleIcon = new WSprite(BattleGoats.id("textures/gui/saddle.png"));
-        slots.setModifiable(!battleGoat.isInSittingPose());
-        root.add(slots, 15, 120);
+        saddle.setModifiable(!battleGoat.isInSittingPose());
+        root.add(saddle, 15, 120);
         root.add(saddleIcon, 16, 121, 16, 16);
+
+        WItemSlot gadgets = WItemSlot.of(battleGoat.getInventory(), 1, 4, 2);
+        root.add(gadgets, 100, 90);
 
         root.add(this.createPlayerInventoryPanel(), 15, 150);
         root.validate(this);

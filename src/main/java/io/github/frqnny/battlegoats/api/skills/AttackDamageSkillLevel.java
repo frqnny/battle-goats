@@ -13,7 +13,7 @@ public class AttackDamageSkillLevel extends SkillLevel {
 
     @Override
     public void updateSkill() {
-        this.goat.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(5D + (level * 0.5D));
+        this.goat.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(level + 5);
     }
 
     @Override
@@ -26,5 +26,6 @@ public class AttackDamageSkillLevel extends SkillLevel {
     public void readNbt(NbtCompound nbt) {
         this.level = nbt.getInt("AttackDamageLevel");
         this.xp = nbt.getInt("AttackDamageXP");
+        updateSkill();
     }
 }

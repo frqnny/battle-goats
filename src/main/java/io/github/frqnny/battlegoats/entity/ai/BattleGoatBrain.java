@@ -24,7 +24,6 @@ public class BattleGoatBrain {
     private static final UniformIntProvider WALKING_SPEED = UniformIntProvider.create(5, 16);
     private static final UniformIntProvider LONG_JUMP_COOLDOWN_RANGE = UniformIntProvider.create(600, 1200);
     private static final UniformIntProvider RAM_COOLDOWN_RANGE = UniformIntProvider.create(600, 6000);
-    private static final UniformIntProvider SCREAMING_RAM_COOLDOWN_RANGE = UniformIntProvider.create(100, 300);
     private static final TargetPredicate RAM_TARGET_PREDICATE = TargetPredicate.createAttackable().setPredicate((livingEntity) -> !livingEntity.getType().equals(EntityType.GOAT) && livingEntity.world.getWorldBorder().contains(livingEntity.getBoundingBox()));
 
     public static void resetLongJumpCooldown(BattleGoatEntity goat) {
@@ -49,7 +48,6 @@ public class BattleGoatBrain {
                         new TrackOwnerAttackerTask(),
                         new AttackWithOwnerTask(),
                         new StayAboveWaterTask(0.8F),
-                        //new SitTask(),
                         new WalkTask(2.0F),
                         new LookAroundTask(45, 90),
                         new WanderAroundTask(),
@@ -98,7 +96,7 @@ public class BattleGoatBrain {
     private static void addRamActivities(Brain<BattleGoatEntity> brain) {
         brain.setTaskList(Activity.RAM,
                 ImmutableList.of(
-                        Pair.of(0, new ExtendedRamImpactTask(RAM_TARGET_PREDICATE, 3.0F, (goatEntity) -> goatEntity.isBaby() ? 1.0D : 2.5D, (goatEntity) -> goatEntity.isScreaming() ? SoundEvents.ENTITY_GOAT_SCREAMING_RAM_IMPACT : SoundEvents.ENTITY_GOAT_RAM_IMPACT))
+                        Pair.of(0, new ExtendedRamImpactTask(RAM_TARGET_PREDICATE, 3.0F, (goat) -> 2.5D , (goat) -> SoundEvents.ENTITY_GOAT_RAM_IMPACT))
                 ),
                 ImmutableSet.of(
                         Pair.of(MemoryModuleType.RAM_TARGET, MemoryModuleState.VALUE_PRESENT)

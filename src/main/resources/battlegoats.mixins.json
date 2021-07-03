@@ -4,7 +4,8 @@
   "package": "io.github.frqnny.battlegoats.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "MixinGoatEntity"
+    "MixinGoatEntity",
+    "MixinFireworkItem"
   ],
   "injectors": {
     "defaultRequire": 1

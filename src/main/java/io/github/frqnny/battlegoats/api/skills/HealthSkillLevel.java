@@ -2,6 +2,8 @@ package io.github.frqnny.battlegoats.api.skills;
 
 import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.nbt.NbtCompound;
 
 public class HealthSkillLevel extends SkillLevel {
@@ -14,6 +16,7 @@ public class HealthSkillLevel extends SkillLevel {
     @Override
     public void updateSkill() {
         goat.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue((level * 2) + 10);
+        goat.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 50, Math.min(goat.world.getDifficulty().getId() - 1, 0)));
     }
 
     @Override
@@ -26,7 +29,6 @@ public class HealthSkillLevel extends SkillLevel {
     public void readNbt(NbtCompound nbt) {
         this.xp = nbt.getInt("HealthXP");
         this.level = nbt.getInt("HealthLevel");
-        updateSkill();
     }
 
 }

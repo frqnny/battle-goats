@@ -3,12 +3,15 @@ package io.github.frqnny.battlegoats.entity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import io.github.frqnny.battlegoats.BattleGoats;
+import io.github.frqnny.battlegoats.api.GadgetType;
 import io.github.frqnny.battlegoats.api.skills.*;
 import io.github.frqnny.battlegoats.client.gui.BattleGoatGUI;
 import io.github.frqnny.battlegoats.entity.ai.BattleGoatBrain;
 import io.github.frqnny.battlegoats.entity.inv.BattleGoatInventory;
 import io.github.frqnny.battlegoats.init.EntitiesBG;
+import io.github.frqnny.battlegoats.item.GadgetItem;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
@@ -28,6 +31,7 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SaddleItem;
@@ -51,8 +55,7 @@ import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandlerFactory, Tameable, Saddleable, JumpingMount {
     public static final Identifier ID = BattleGoats.id("battle_goat");
@@ -62,9 +65,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     protected static final TrackedData<Optional<UUID>> OWNER_UUID = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     protected static final TrackedData<Boolean> JUMPING = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> SADDLED = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Integer> BOOST_TIME = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.INTEGER);
-
-
     public final HealthSkillLevel healthSkillLevel = new HealthSkillLevel(this);
     public final SpeedSkillLevel speedSkillLevel = new SpeedSkillLevel(this);
     public final JumpSkillLevel jumpSkillLevel = new JumpSkillLevel();
@@ -79,11 +79,12 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     private boolean jumping;
     private int jumpingTicks;
     private int speedTicks = -1;
+    private final HashSet<GadgetType> gadgetSet = new HashSet<>(10);
 
     public BattleGoatEntity(EntityType<? extends GoatEntity> entityType, World world) {
         super(entityType, world);
         inv = new BattleGoatInventory(this);
-        this.saddledComponent = new SaddledComponent(this.dataTracker, BOOST_TIME, SADDLED);
+        this.saddledComponent = new SaddledComponent(this.dataTracker, null, SADDLED);
         delegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
@@ -128,8 +129,8 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         };
     }
 
-    public static DefaultAttributeContainer.Builder createGoatAttributes() {
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.20000000298023224D).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10.0D);
+    public static DefaultAttributeContainer.Builder createBattleGoatAttributes() {
+        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.20000000298023224D).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0D);
     }
 
     //After some research, this only returns the brain variable (both getModBrain and getBrain) so I guess it's just to shut up compile errors? We don't have to override normal goat tasks to make them use this tldr
@@ -283,6 +284,7 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         if (this.isAlive()) {
             if (this.hasPassengers() && this.canBeControlledByRider() && this.isSaddled()) {
                 LivingEntity livingEntity = (LivingEntity) this.getPrimaryPassenger();
+
                 this.setYaw(livingEntity.getYaw());
                 this.prevYaw = this.getYaw();
                 this.setPitch(livingEntity.getPitch() * 0.5F);
@@ -290,10 +292,15 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
                 this.bodyYaw = this.getYaw();
                 this.headYaw = this.bodyYaw;
                 this.stepHeight = 1.0F;
-                float f = livingEntity.sidewaysSpeed * 0.5F;
-                float g = livingEntity.forwardSpeed;
+                if (!this.world.isClient()) {
+                    this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, this.hasGadgetEquipped(GadgetType.WINGS) && !this.isOnGround());
+                }
 
-                if (g != 0) {
+
+                float sidewaysSpeed = livingEntity.sidewaysSpeed * 0.5F;
+                float forwardSpeed = livingEntity.forwardSpeed;
+
+                if (forwardSpeed != 0) {
                     if (speedTicks > 0) {
                         speedTicks--;
                     } else {
@@ -302,16 +309,20 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
                     }
                 }
 
-                if (g <= 0.0F) {
-                    g *= 0.25F;
+                if (forwardSpeed <= 0.0F) {
+                    forwardSpeed *= 0.25F;
                 }
 
                 if (this.onGround && this.jumpStrength == 0.0F && this.isAngry() && !this.jumping) {
-                    f = 0.0F;
-                    g = 0.0F;
+                    sidewaysSpeed = 0.0F;
+                    forwardSpeed = 0.0F;
                 }
 
-                if (this.jumpStrength > 0.0F && !this.isInAir() && this.onGround) {
+                boolean hasWingsEquipped = this.hasGadgetEquipped(GadgetType.WINGS);
+                if (this.jumpStrength > 0.0F && (hasWingsEquipped || !this.isInAir() && this.onGround)) {
+                    if (hasWingsEquipped) {
+                        this.jumpStrength *= 0.75;
+                    }
                     double d = this.jumpStrength * (double) this.jumpStrength * (double) this.getJumpVelocityMultiplier();
                     double h;
                     if (this.hasStatusEffect(StatusEffects.JUMP_BOOST)) {
@@ -324,19 +335,20 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
                     this.setVelocity(vec3d.x, h, vec3d.z);
                     this.setInAir(true);
                     this.velocityDirty = true;
-                    if (g > 0.0F) {
+                    if (forwardSpeed > 0.0F) {
                         float i = MathHelper.sin(this.getYaw() * 0.017453292F);
                         float j = MathHelper.cos(this.getYaw() * 0.017453292F);
                         this.setVelocity(this.getVelocity().add(-0.4F * i * this.jumpStrength, 0.0D, 0.4F * j * this.jumpStrength));
                     }
-
                     this.jumpStrength = 0.0F;
                 }
 
                 this.flyingSpeed = this.getMovementSpeed() * 0.1F;
+
                 if (this.isLogicalSideForUpdatingMovement()) {
+
                     this.setMovementSpeed((float) this.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
-                    super.travel(new Vec3d(f, movementInput.y, g));
+                    super.travel(new Vec3d(sidewaysSpeed, movementInput.y, forwardSpeed));
                 } else if (livingEntity instanceof PlayerEntity) {
                     this.setVelocity(Vec3d.ZERO);
                 }
@@ -380,7 +392,13 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     }
 
     public void onInvChange() {
-        //TODO implement gadget update
+        this.gadgetSet.clear();
+
+        for (GadgetType gadgetType : GadgetType.values) {
+            if (hasGadgetEquipped(gadgetType)) {
+                gadgetSet.add(gadgetType);
+            }
+        }
 
         this.saddledComponent.setSaddled(inv.contains(stack -> stack.getItem() instanceof SaddleItem));
     }
@@ -389,7 +407,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(SADDLED, false);
-        this.dataTracker.startTracking(BOOST_TIME, 0);
         this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(OWNER_UUID, Optional.empty());
         this.dataTracker.startTracking(JUMPING, false);
@@ -472,6 +489,8 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     public void tickMovement() {
         if (!this.world.isClient()) {
             if (!isSitting()) {
+                this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, this.hasGadgetEquipped(GadgetType.WINGS) && !this.isOnGround());
+
                 super.tickMovement();
             }
             this.dataTracker.set(SITTING, isSitting());
@@ -538,6 +557,9 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
 
     public void tick() {
         super.tick();
+        if (this.isOnGround()) {
+
+        }
         if ((this.isLogicalSideForUpdatingMovement() || this.canMoveVoluntarily()) && this.jumpingTicks > 0 && ++this.jumpingTicks > 20) {
             this.jumpingTicks = 0;
             this.setAngry(false);
@@ -553,7 +575,7 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         }
 
         int i = this.computeFallDamage(fallDistance, damageMultiplier);
-        if (i <= 0) {
+        if (i <= 0 || this.hasGadgetEquipped(GadgetType.WINGS)) {
             return false;
         } else {
             this.damage(damageSource, (float) i);
@@ -586,6 +608,38 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     }
 
     public float getAttackDamage() {
-        return (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        return (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) + (this.hasGadgetEquipped(GadgetType.STEEL_HORNS) ? 3.0F : 0.0F);
     }
+
+    public Set<GadgetType> getEquippedGadgetTypes() {
+        return gadgetSet;
+    }
+
+    public boolean hasGadgetEquipped(GadgetType type) {
+        return this.inv.contains((stack) -> stack.getItem() instanceof GadgetItem gadgetItem && gadgetItem.type == type);
+    }
+
+    public void startFallFlying() {
+
+        this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, true);
+    }
+
+    public void stopFallFlying() {
+        this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, true);
+        this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, false);
+    }
+
+
+
+    public boolean checkFallFlying() {
+        if (!this.onGround && !this.isFallFlying() && !this.isTouchingWater() && !this.hasStatusEffect(StatusEffects.LEVITATION)) {
+            if (this.hasGadgetEquipped(GadgetType.WINGS)) {
+                this.startFallFlying();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

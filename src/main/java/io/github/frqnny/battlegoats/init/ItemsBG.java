@@ -3,6 +3,7 @@ package io.github.frqnny.battlegoats.init;
 import io.github.frqnny.battlegoats.BattleGoats;
 import io.github.frqnny.battlegoats.api.GadgetType;
 import io.github.frqnny.battlegoats.item.GadgetItem;
+import io.github.frqnny.battlegoats.item.NoItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -17,6 +18,8 @@ public class ItemsBG {
     public static final Item STEEL_HORNS_GADGET = new GadgetItem(GadgetType.STEEL_HORNS, new FabricItemSettings().maxCount(1).group(BattleGoats.ITEM_GROUP));
     public static final Item GLASSES_GADGET = new GadgetItem(GadgetType.GLASSES, new FabricItemSettings().maxCount(1).group(BattleGoats.ITEM_GROUP));
     public static final Item MEGA_LEGS_GADGET = new GadgetItem(GadgetType.MEGA_LEGS, new FabricItemSettings().maxCount(1).group(BattleGoats.ITEM_GROUP));
+    public static final Item SUPER_LEG_INTERNAL = new NoItem();
+    public static final Item WINGS_INTERNAL = new NoItem();
 
     public static void init() {
         Registry<Item> r = Registry.ITEM;
@@ -27,5 +30,7 @@ public class ItemsBG {
         Registry.register(r, BattleGoats.id("steel_horns_gadget"), STEEL_HORNS_GADGET);
         Registry.register(r, BattleGoats.id("glasses_gadget"), GLASSES_GADGET);
         Registry.register(r, BattleGoats.id("mega_legs_gadget"), MEGA_LEGS_GADGET);
+        Registry.register(r, BattleGoats.id("internal_one"), SUPER_LEG_INTERNAL);
+        Registry.register(r, BattleGoats.id("internal_two"), WINGS_INTERNAL);
     }
 }
