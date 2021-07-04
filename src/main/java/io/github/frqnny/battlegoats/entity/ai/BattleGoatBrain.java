@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
 import io.github.frqnny.battlegoats.entity.ai.task.AttackWithOwnerTask;
-import io.github.frqnny.battlegoats.entity.ai.task.ExtendedRamImpactTask;
+import io.github.frqnny.battlegoats.entity.ai.task.RamImpactTaskBG;
 import io.github.frqnny.battlegoats.entity.ai.task.TrackOwnerAttackerTask;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.TargetPredicate;
@@ -96,11 +96,9 @@ public class BattleGoatBrain {
     private static void addRamActivities(Brain<BattleGoatEntity> brain) {
         brain.setTaskList(Activity.RAM,
                 ImmutableList.of(
-                        Pair.of(0, new ExtendedRamImpactTask(RAM_TARGET_PREDICATE, 3.0F, (goat) -> 2.5D , (goat) -> SoundEvents.ENTITY_GOAT_RAM_IMPACT))
+                        Pair.of(0, new RamImpactTaskBG())
                 ),
-                ImmutableSet.of(
-                        Pair.of(MemoryModuleType.RAM_TARGET, MemoryModuleState.VALUE_PRESENT)
-                )
+                ImmutableSet.of()
         );
     }
 

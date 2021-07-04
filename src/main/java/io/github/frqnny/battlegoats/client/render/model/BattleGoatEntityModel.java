@@ -35,6 +35,7 @@ public class BattleGoatEntityModel<T extends BattleGoatEntity> extends Quadruped
             this.head.pitch = k;
         }
 
+
     }
 
 

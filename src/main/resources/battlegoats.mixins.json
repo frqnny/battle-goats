@@ -7,6 +7,9 @@
     "MixinGoatEntity",
     "MixinFireworkItem"
   ],
+  "client": [
+    "MixinPlayerEntityRenderer"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

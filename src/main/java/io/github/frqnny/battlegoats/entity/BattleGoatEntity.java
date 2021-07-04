@@ -9,9 +9,9 @@ import io.github.frqnny.battlegoats.client.gui.BattleGoatGUI;
 import io.github.frqnny.battlegoats.entity.ai.BattleGoatBrain;
 import io.github.frqnny.battlegoats.entity.inv.BattleGoatInventory;
 import io.github.frqnny.battlegoats.init.EntitiesBG;
+import io.github.frqnny.battlegoats.init.MemoryModulesBG;
 import io.github.frqnny.battlegoats.item.GadgetItem;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
@@ -31,7 +31,6 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SaddleItem;
@@ -55,13 +54,16 @@ import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandlerFactory, Tameable, Saddleable, JumpingMount {
     public static final Identifier ID = BattleGoats.id("battle_goat");
     public static final TrackedData<Boolean> SITTING = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     protected static final ImmutableList<SensorType<? extends Sensor<? super GoatEntity>>> SENSORS = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.GOAT_TEMPTATIONS);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_MODULES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.VISIBLE_MOBS, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLING_DOWN, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, MemoryModuleType.IS_TEMPTED, MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryModuleType.RAM_TARGET);
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_MODULES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.VISIBLE_MOBS, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLING_DOWN, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, MemoryModuleType.IS_TEMPTED, MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryModuleType.RAM_TARGET, MemoryModulesBG.RAM_TARGETS);
     protected static final TrackedData<Optional<UUID>> OWNER_UUID = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     protected static final TrackedData<Boolean> JUMPING = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> SADDLED = DataTracker.registerData(BattleGoatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -71,6 +73,7 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     public final AttackDamageSkillLevel attackDamageSkillLevel = new AttackDamageSkillLevel(this);
     private final BattleGoatInventory inv;
     private final SaddledComponent saddledComponent;
+    private final HashSet<GadgetType> gadgetSet = new HashSet<>(10);
     public PropertyDelegate delegate;
     public boolean sitting = false;
     public boolean alreadyInteracted = false;
@@ -79,7 +82,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     private boolean jumping;
     private int jumpingTicks;
     private int speedTicks = -1;
-    private final HashSet<GadgetType> gadgetSet = new HashSet<>(10);
 
     public BattleGoatEntity(EntityType<? extends GoatEntity> entityType, World world) {
         super(entityType, world);
@@ -608,7 +610,7 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
     }
 
     public float getAttackDamage() {
-        return (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) + (this.hasGadgetEquipped(GadgetType.STEEL_HORNS) ? 3.0F : 0.0F);
+        return (float) this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) + (this.hasGadgetEquipped(GadgetType.STEEL_HORNS) ? 3.0F : 0.0F);
     }
 
     public Set<GadgetType> getEquippedGadgetTypes() {
@@ -628,7 +630,6 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, true);
         this.setFlag(Entity.FALL_FLYING_FLAG_INDEX, false);
     }
-
 
 
     public boolean checkFallFlying() {

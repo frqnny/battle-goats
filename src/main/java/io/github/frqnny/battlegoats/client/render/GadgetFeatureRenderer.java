@@ -30,7 +30,7 @@ public class GadgetFeatureRenderer extends FeatureRenderer<BattleGoatEntity, Bat
             if (GadgetType.STEEL_HORNS.equals(type)) {
                 matrices.push();
                 this.getContextModel().getHead().rotate(matrices);
-                matrices.translate(-0.12,-0.65,-0.5);
+                matrices.translate(-0.12, -0.65, -0.5);
                 int lightAbove = WorldRenderer.getLightmapCoordinates(entity.world, entity.getBlockPos());
                 MinecraftClient.getInstance().getItemRenderer().renderItem(SUPER_LEGS, ModelTransformation.Mode.GROUND, lightAbove, LivingEntityRenderer.getOverlay(entity, 0), matrices, vertexConsumers, 0);
                 matrices.pop();
@@ -38,7 +38,7 @@ public class GadgetFeatureRenderer extends FeatureRenderer<BattleGoatEntity, Bat
                 matrices.push();
                 this.getContextModel().getBody().rotate(matrices);
                 matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
-                matrices.translate(0,-0.65,0);
+                matrices.translate(0, -0.65, 0);
                 int lightAbove = WorldRenderer.getLightmapCoordinates(entity.world, entity.getBlockPos());
                 MinecraftClient.getInstance().getItemRenderer().renderItem(WINGS, ModelTransformation.Mode.GROUND, lightAbove, LivingEntityRenderer.getOverlay(entity, 0), matrices, vertexConsumers, 0);
                 matrices.pop();

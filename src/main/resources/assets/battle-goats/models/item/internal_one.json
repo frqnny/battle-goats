@@ -1,32 +1,144 @@
 {
-	"textures": {
-		"0": "battle-goats:item/super_horns",
-		"particle": "battle-goats:item/super_horns"
-	},
-	"elements": [
-		{
-			"from": [6.75, 2, 5.75],
-			"to": [9.25, 6.1, 8.25],
-			"faces": {
-				"north": {"uv": [2, 2, 4, 6], "texture": "#0"},
-				"east": {"uv": [0, 2, 2, 6], "texture": "#0"},
-				"south": {"uv": [6, 2, 8, 6], "texture": "#0"},
-				"west": {"uv": [4, 2, 6, 6], "texture": "#0"},
-				"up": {"uv": [4, 2, 2, 0], "texture": "#0"},
-				"down": {"uv": [6, 0, 4, 2], "texture": "#0"}
-			}
-		},
-		{
-			"from": [9.75, 2, 5.75],
-			"to": [12.25, 6.1, 8.25],
-			"faces": {
-				"north": {"uv": [2, 2, 4, 6], "texture": "#0"},
-				"east": {"uv": [0, 2, 2, 6], "texture": "#0"},
-				"south": {"uv": [6, 2, 8, 6], "texture": "#0"},
-				"west": {"uv": [4, 2, 6, 6], "texture": "#0"},
-				"up": {"uv": [4, 2, 2, 0], "texture": "#0"},
-				"down": {"uv": [6, 0, 4, 2], "texture": "#0"}
-			}
-		}
-	]
+  "textures": {
+    "0": "battle-goats:item/super_horns",
+    "particle": "battle-goats:item/super_horns"
+  },
+  "elements": [
+    {
+      "from": [
+        6.75,
+        2,
+        5.75
+      ],
+      "to": [
+        9.25,
+        6.1,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            2,
+            4,
+            6
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0,
+            2,
+            2,
+            6
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            6,
+            2,
+            8,
+            6
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            4,
+            2,
+            6,
+            6
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            4,
+            2,
+            2,
+            0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            6,
+            0,
+            4,
+            2
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        9.75,
+        2,
+        5.75
+      ],
+      "to": [
+        12.25,
+        6.1,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            2,
+            4,
+            6
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0,
+            2,
+            2,
+            6
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            6,
+            2,
+            8,
+            6
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            4,
+            2,
+            6,
+            6
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            4,
+            2,
+            2,
+            0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            6,
+            0,
+            4,
+            2
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ]
 }
