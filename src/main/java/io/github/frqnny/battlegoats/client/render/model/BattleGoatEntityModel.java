@@ -34,7 +34,12 @@ public class BattleGoatEntityModel<T extends BattleGoatEntity> extends Quadruped
         if (k != 0.0F) {
             this.head.pitch = k;
         }
+        /*
+        if (goatEntity.isFallFlying()) {
+            this.head.pitch = 0;
+        }
 
+         */
 
     }
 

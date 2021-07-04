@@ -20,7 +20,7 @@ import java.util.LinkedList;
 public class RamImpactTaskBG extends Task<BattleGoatEntity> {
     public static final int RUN_TIME = 200;
     public static final float SPEED_STRENGTH_MULTIPLIER = 1.65F;
-    private static final float speed = 3.0F;
+    private static final float speed = 2.5F;
     private Vec3d direction;
 
 
@@ -36,12 +36,12 @@ public class RamImpactTaskBG extends Task<BattleGoatEntity> {
 
     @Override
     protected boolean shouldRun(ServerWorld serverWorld, BattleGoatEntity goat) {
-        return goat.getBrain().hasMemoryModule(MemoryModulesBG.RAM_TARGETS) && !goat.hasPassengers();
+        return goat.getBrain().hasMemoryModule(MemoryModulesBG.RAM_TARGETS) && !goat.hasPassengers() && !goat.getBrain().getOptionalMemory(MemoryModulesBG.RAM_TARGETS).get().isEmpty();
     }
 
     @Override
     protected boolean shouldKeepRunning(ServerWorld serverWorld, BattleGoatEntity goat, long l) {
-        return goat.getBrain().hasMemoryModule(MemoryModulesBG.RAM_TARGETS) && !goat.hasPassengers();
+        return shouldRun(serverWorld, goat);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class RamImpactTaskBG extends Task<BattleGoatEntity> {
         if (!walkTargets.isEmpty()) {
             if (((EntityLookTarget) walkTargets.getFirst().getLookTarget()).getEntity() instanceof LivingEntity target) {
                 moveTo(goat, target);
-                if (goat.squaredDistanceTo(target) < 0.5) {
+                if (goat.squaredDistanceTo(target) < 2) {
                     target.damage(DamageSource.mob(goat).setNeutral(), goat.getAttackDamage());
                     float f = target.blockedByShield(DamageSource.mob(goat)) ? 0.5F : 1.0F;
                     float g = MathHelper.clamp(goat.getMovementSpeed() * SPEED_STRENGTH_MULTIPLIER, 0.2F, 3.0F);
@@ -70,7 +70,7 @@ public class RamImpactTaskBG extends Task<BattleGoatEntity> {
                     if (target.isDead()) {
                         walkTargets.removeFirst();
                         goat.attackDamageSkillLevel.addXp(8);
-                        goat.healthSkillLevel.addXp(2);
+                        goat.healthSkillLevel.addXp(4);
                         if (!walkTargets.isEmpty()) {
                             moveTo(goat, ((EntityLookTarget) walkTargets.getFirst().getLookTarget()).getEntity());
                         }

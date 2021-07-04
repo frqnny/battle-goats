@@ -11,6 +11,7 @@ import io.github.frqnny.battlegoats.entity.inv.BattleGoatInventory;
 import io.github.frqnny.battlegoats.init.EntitiesBG;
 import io.github.frqnny.battlegoats.init.MemoryModulesBG;
 import io.github.frqnny.battlegoats.item.GadgetItem;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
@@ -352,7 +353,9 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
                     this.setMovementSpeed((float) this.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
                     super.travel(new Vec3d(sidewaysSpeed, movementInput.y, forwardSpeed));
                 } else if (livingEntity instanceof PlayerEntity) {
-                    this.setVelocity(Vec3d.ZERO);
+                    if (!this.isFallFlying()) {
+                        this.setVelocity(Vec3d.ZERO);
+                    }
                 }
 
                 if (this.onGround) {
@@ -412,6 +415,11 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
         this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(OWNER_UUID, Optional.empty());
         this.dataTracker.startTracking(JUMPING, false);
+
+
+        if (!this.world.isClient()) {
+            //ServerPlayNetworking.send()
+        }
     }
 
     @Override
@@ -518,7 +526,12 @@ public class BattleGoatEntity extends GoatEntity implements ExtendedScreenHandle
                 this.jumpStrength = 0.4F + 0.4F * (float) strength / 90.0F;
             }
 
-            this.jumpStrength += jumpSkillLevel.getJumpStrength();
+            if (this.isFallFlying() && strength < 20) {
+                this.jumpStrength = 0;
+            } else {
+                this.jumpStrength += jumpSkillLevel.getJumpStrength();
+
+            }
         }
     }
 

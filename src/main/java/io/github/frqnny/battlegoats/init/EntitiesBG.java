@@ -5,6 +5,8 @@ import io.github.frqnny.battlegoats.BattleGoatsClient;
 import io.github.frqnny.battlegoats.client.render.BattleGoatEntityRenderer;
 import io.github.frqnny.battlegoats.client.render.model.BattleGoatEntityModel;
 import io.github.frqnny.battlegoats.entity.BattleGoatEntity;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -32,5 +34,6 @@ public class EntitiesBG {
         EntityRendererRegistry.INSTANCE.register(BATTLE_GOAT, BattleGoatEntityRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(BattleGoatsClient.BATTLE_GOATS_LAYER, () -> BattleGoatEntityModel.getTexturedModelData(Dilation.NONE));
         EntityModelLayerRegistry.registerModelLayer(BattleGoatsClient.BATTLE_GOATS_SADDLE_LAYER, () -> BattleGoatEntityModel.getTexturedModelData(new Dilation(0.5F)));
+
     }
 }
